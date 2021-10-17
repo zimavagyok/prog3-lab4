@@ -2,7 +2,25 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    public static ArrayList<Beer> beers;
+    private static ArrayList<Beer> beers = new ArrayList<Beer>();
+    private static Map<String, Command> commands = new HashMap<>();
+    private static Map<String, Comparator<Beer>> comparators = new HashMap<>();
+
+    static {
+        comparators.put("name",Comparator.comparing((a) -> a.get_name()));
+        comparators.put("style",Comparator.comparing((a) -> a.get_style()));
+        comparators.put("strength",Comparator.comparing((a) -> a.get_strength()));
+    }
+    public static void storeCommands() {
+        commands.put("exit",Main::exit);
+        commands.put("add",Main::add);
+        commands.put("list",Main::list);
+        commands.put("save",Main::save);
+        commands.put("load",Main::load);
+        commands.put("search",Main::search);
+        commands.put("find",Main::find);
+        commands.put("delete",Main::delete);
+    }
 
     protected static void add(String[] cmd) {
         beers.add(new Beer(cmd[1],cmd[2],Double.parseDouble(cmd[3])));
@@ -10,18 +28,7 @@ public class Main {
 
     protected static void list(String[] cmd) {
         if(cmd.length>1) {
-            Comparator<Beer> cmp = null;
-            switch(cmd[1]) {
-                case "name":
-                    cmp = new NameComparator();
-                    break;
-                case "style":
-                    cmp = new StyleComparator();
-                    break;
-                case "strength":
-                    cmp = new StrengthComparator();
-                    break;
-            }
+            Comparator<Beer> cmp = comparators.get("name");
             beers.sort(cmp);
         }
         for(Beer b : beers) {
@@ -112,29 +119,20 @@ public class Main {
         }
     }
 
+    protected static void exit(String[] cmd) {
+        System.exit(0);
+    }
+
     public static void main(String[] args) throws IOException {
-        beers = new ArrayList<Beer>();
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        storeCommands();
 
         while(true) {
             String line[] = br.readLine().split(" ");
-            if(line[0].equals("exit")) {
-                br.close();
-                System.exit(0);
-            } else if(line[0].equals("add")) {
-                add(line);
-            } else if(line[0].equals("list")) {
-                list(line);
-            } else if(line[0].equals("save")) {
-                save(line);
-            } else if(line[0].equals("load")) {
-                load(line);
-            } else if(line[0].equals("search")) {
-                search(line);
-            } else if(line[0].equals("find")) {
-                find(line);
-            } else if(line[0].equals("delete")) {
-                delete(line);
+            if(!commands.containsKey(line[0])) {
+                System.out.println("Nincs ilyen parancs!");
+            } else {
+                commands.get(line[0]).execute(line);
             }
         }
     }
