@@ -28,7 +28,7 @@ public class Main {
 
     protected static void list(String[] cmd) {
         if(cmd.length>1) {
-            Comparator<Beer> cmp = comparators.get("name");
+            Comparator<Beer> cmp = comparators.get(cmd[1]);
             beers.sort(cmp);
         }
         for(Beer b : beers) {
